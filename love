@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- 明确声明字符编码为UTF-8 -->
+    <meta charset="UTF-8">
+    <style>
+        /* 新增文字容器样式 */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .heart {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            animation: heartbeat 1.2s infinite;
+        }
+
+        /* 新增文字样式 */
+        .love-text {
+            color: #fff;
+            font-size: 24px;
+            font-family: 'Microsoft Yahei', sans-serif;
+            margin-top: 30px;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+            animation: textScale 1.2s infinite;
+        }
+
+        /* 原有样式保持不变... */
+        .heart::before,
+        .heart::after {
+            content: '';
+            position: absolute;
+            width: 70px;
+            height: 110px;
+            background: linear-gradient(
+                45deg,
+                #ff3377 20%,
+                #ff0066 80%
+            );
+            border-radius: 70px 70px 0 0;
+            box-shadow: 0 0 40px rgba(255, 51, 119, 0.3);
+        }
+
+        .heart::before {
+            left: 70px;
+            transform: rotate(-45deg);
+            transform-origin: 0 100%;
+        }
+
+        .heart::after {
+            left: 0;
+            transform: rotate(45deg);
+            transform-origin: 100% 100%;
+        }
+
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            15% { transform: scale(1.3); }
+            30% { transform: scale(1); }
+            45% { transform: scale(1.15); }
+            60% { transform: scale(1); }
+        }
+
+        /* 新增文字动画 */
+        @keyframes textScale {
+            0% { transform: scale(1); opacity: 0.9; }
+            15% { transform: scale(1.05); opacity: 1; }
+            30% { transform: scale(1); }
+            45% { transform: scale(1.02); }
+            60% { transform: scale(1); }
+        }
+
+        body {
+            background: linear-gradient(135deg, #2c0b31, #4b1346);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="heart"></div>
+        <!-- 修改这里的文字内容 -->
+        <p class="love-text">xxx我喜欢你</p>
+    </div>
+</body>
+</html>
