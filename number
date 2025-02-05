@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学号随机抽取机</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-size: 16px;
+        }
+        input {
+            padding: 8px;
+            font-size: 16px;
+            width: 100px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>学号随机抽取机</h1>
+        <label for="maleCount">抽取男生人数：</label>
+        <input type="number" id="maleCount" min="0" max="30" placeholder="0-30">
+        <label for="femaleCount">抽取女生人数：</label>
+        <input type="number" id="femaleCount" min="0" max="30" placeholder="0-30">
+        <button onclick="startDraw()">开始抽取</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // 学号范围
+        const totalStudents = 63;
+        const missingNumbers = [4, 5, 24, 45]; // 没有人的学号
+
+        // 男生和女生的学号范围
+        const femaleNumbers = [...Array(28).keys()].map(i => i + 1) // 1-28
+            .concat([60, 61]) // 60和61也是女生
+            .filter(num => !missingNumbers.includes(num)); // 排除没有人的学号
+
+        const maleNumbers = [...Array(31).keys()].map(i => i + 29) // 29-59
+            .concat([62, 63]) // 62和63是男生
+            .filter(num => !missingNumbers.includes(num)); // 排除没有人的学号
+
+        // 抽取函数
+        function startDraw() {
+            const maleCount = parseInt(document.getElementById("maleCount").value);
+            const femaleCount = parseInt(document.getElementById("femaleCount").value);
+
+            // 校验输入
+            if (isNaN(maleCount) || isNaN(femaleCount) || maleCount < 0 || femaleCount < 0) {
+                alert("请输入有效的数字！");
+                return;
+            }
+            if (maleCount > maleNumbers.length || femaleCount > femaleNumbers.length) {
+                alert("抽取人数超过范围！");
+                return;
+            }
+
+            // 随机抽取
+            const selectedMales = getRandomNumbers(maleNumbers, maleCount);
+            const selectedFemales = getRandomNumbers(femaleNumbers, femaleCount);
+
+            // 显示结果
+            const result = `抽取到的男生学号：${selectedMales.join(", ")}<br>抽取到的女生学号：${selectedFemales.join(", ")}`;
+            document.getElementById("result").innerHTML = result;
+        }
+
+        // 从数组中随机抽取指定数量的元素
+        function getRandomNumbers(array, count) {
+            const shuffled = array.slice().sort(() => Math.random() - 0.5);
+            return shuffled.slice(0, count).sort((a, b) => a - b);
+        }
+    </script>
+</body>
+</html>
