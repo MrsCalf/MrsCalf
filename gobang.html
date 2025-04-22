@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-color-mode="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <title>五子棋</title>
+    <style>
+        :root {
+            --wood-bg: #f0d9a4;       /* 木质底色 */
+            --grid-line: #5a4d41;     /* 深棕色棋线 */
+            --star-point: #4a4035;    /* 星位颜色 */
+            --page-bg: #e6e0d8;       /* 页面背景 */
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --wood-bg: #f0d9a4;   /* 强制保持木质色 */
+                --grid-line: #5a4d41; /* 保持原有棋线颜色 */
+                --star-point: #4a4035;
+                --page-bg: #2d2d2d;   /* 深色模式页面背景 */
+            }
+        }
+
+        body {
+            background: var(--page-bg);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(15, 1fr);
+            grid-template-rows: repeat(15, 1fr);
+            background: var(--wood-bg);
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            border: 3px solid #d4c4a8;
+            position: relative;
+            aspect-ratio: 1/1; /* 保持正方形 */
+            width: min(90vw, 90vh, 800px); /* 自适应关键 */
+        }
+
+        .cell {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .cell:hover {
+            background: rgba(0,0,0,0.05);
+        }
+
+        /* 棋盘线 */
+        .cell::before,
+        .cell::after {
+            content: '';
+            position: absolute;
+            background: var(--grid-line);
+        }
+
+        .cell::before {
+            width: 100%;
+            height: 1px;
+            top: 50%;
+        }
+
+        .cell::after {
+            width: 1px;
+            height: 100%;
+            left: 50%;
+        }
+
+        /* 棋子 */
+        .stone {
+            width: 70%;
+            height: 70%;
+            border-radius: 50%;
+            position: relative;
+            z-index: 1;
+            transition: transform 0.1s;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        }
+
+        .stone.black {
+            background: radial-gradient(circle at 30% 30%, #4a4a4a, #000000);
+        }
+
+        .stone.white {
+            background: radial-gradient(circle at 30% 30%, #ffffff, #f0f0f0);
+        }
+
+        /* 星位 */
+        .cell[data-star]::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--star-point);
+            position: absolute;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body>
+    <div class="board" id="board"></div>
+
+    <script>
+        class Gomoku {
+            constructor() {
+                this.board = document.getElementById('board');
+                this.currentPlayer = 'black';
+                this.gameOver = false;
+                this.boardState = Array(15).fill().map(() => Array(15).fill(null));
+                this.initBoard();
+            }
+
+            initBoard() {
+                const starPositions = new Set(['3-3','3-11','7-7','11-3','11-11']);
+                
+                for (let i = 0; i < 15; i++) {
+                    for (let j = 0; j < 15; j++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'cell';
+                        
+                        if (starPositions.has(`${i}-${j}`)) {
+                            cell.setAttribute('data-star', '');
+                        }
+
+                        cell.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            this.handleClick(i, j);
+                        });
+                        this.board.appendChild(cell);
+                    }
+                }
+            }
+
+            handleClick(row, col) {
+                if (this.gameOver || this.boardState[row][col]) return;
+
+                const stone = document.createElement('div');
+                stone.className = `stone ${this.currentPlayer}`;
+                this.board.children[row * 15 + col].appendChild(stone);
+                this.boardState[row][col] = this.currentPlayer;
+
+                if (this.checkWin(row, col)) {
+                    alert(`${this.currentPlayer.toUpperCase()} 胜利！`);
+                    this.gameOver = true;
+                    return;
+                }
+
+                this.currentPlayer = this.currentPlayer === 'black' ? 'white' : 'black';
+            }
+
+            checkWin(row, col) {
+                const directions = [
+                    [[0,1],[0,-1]],   // 水平
+                    [[1,0],[-1,0]],   // 垂直
+                    [[1,1],[-1,-1]],  // 主对角线
+                    [[1,-1],[-1,1]]   // 副对角线
+                ];
+
+                for (const [inc, dec] of directions) {
+                    let count = 1;
+                    
+                    // 正向检测
+                    let [r, c] = [row, col];
+                    while (true) {
+                        r += inc[0];
+                        c += inc[1];
+                        if (r < 0 || r >= 15 || c < 0 || c >= 15) break;
+                        if (this.boardState[r][c] === this.currentPlayer) count++;
+                        else break;
+                    }
+
+                    // 反向检测
+                    [r, c] = [row, col];
+                    while (true) {
+                        r += dec[0];
+                        c += dec[1];
+                        if (r < 0 || r >= 15 || c < 0 || c >= 15) break;
+                        if (this.boardState[r][c] === this.currentPlayer) count++;
+                        else break;
+                    }
+
+                    if (count >= 5) return true;
+                }
+                return false;
+            }
+        }
+
+        new Gomoku();
+    </script>
+</body>
+</html>
